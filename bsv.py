@@ -3,7 +3,6 @@ import random
 import time
 import threading
 import os
-import sys
 
 def random_string(length):
     characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
