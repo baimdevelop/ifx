@@ -3,6 +3,7 @@ import random
 import time
 import threading
 import os
+import sys
 
 def random_string(length):
     characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -41,4 +42,4 @@ def main(url, time):
     print("CFBypass completed.")
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2]
+    main(sys.argv[1], sys.argv[2])
