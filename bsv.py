@@ -50,7 +50,6 @@ def main():
 
     while time.time() - start_time <= interval:
         attack()
-        time.sleep(1)
 
 if __name__ == '__main__':
     main()
