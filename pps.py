@@ -57,4 +57,4 @@ def main():
     print(f"Packets per second: {packets_per_second:.2f} PPS")
 
 if __name__ == "__main__":
-    main(
+    main()
